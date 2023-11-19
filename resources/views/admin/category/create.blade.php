@@ -31,9 +31,7 @@
                         <div class="flex gap-3 p-3 items-center">
                             <div class="float-left w-2/5 font-thin">Description</div>
                             <div class="border w-[400px]">
-                                <textarea type="text" name="description" id="" class="w-full outline-none px-2 py-0.5 h-32 resize-none">
-                                </textarea>
-
+                                <textarea type="text" name="description" id="" class="w-full outline-none px-2 py-0.5 h-32 resize-none"></textarea>
                             </div>
                         </div>
 

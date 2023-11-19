@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('release');
             $table->integer('pageCount');
             $table->text('description');
+            $table->string('image_path')->nullable();
             $table->timestamps();
         });
     }

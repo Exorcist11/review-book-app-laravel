@@ -9,8 +9,8 @@ class Publisher extends Model
 {
     use HasFactory;
 
-    public function images()
-    {
-        return $this->morphMany(Image::class, 'imageable');
-    }
+    protected $fillable = [
+        'publiserName',
+        'contact'
+    ];
 }

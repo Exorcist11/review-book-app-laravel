@@ -3,10 +3,10 @@
 @section('admin')
     <div class="flex justify-between items-center">
         <div class="font-bold text-xl">
-            Category List
+            Author List
         </div>
         <div class="px-2 py-1 border rounded-lg cursor-pointer hover:bg-[#f3f2f2]">
-            <a href={{ url('/admin/category/create') }}>Add new category</a>
+            <a href={{ url('/admin/author/create') }}>Add new author</a>
         </div>
     </div>
     <div class="w-full pt-5">
@@ -15,11 +15,11 @@
                 <table class="w-full text-md bg-white shadow-md rounded mb-4 table-fixed">
                     <tr class="border-b">
                         <th class="text-left p-3 px-5 w-2/12">ID</th>
-                        <th class="text-left p-3 px-5">Category Name</th>
+                        <th class="text-left p-3 px-5">Author Name</th>
                         <th class="text-left p-3 px-5">Description</th>
                         <th></th>
                     </tr>
-                    @if ($categories)
+                    {{-- @if ($categories)
                         @foreach ($categories as $item)
                             <tr class="border-b hover:bg-orange-100 bg-gray-100">
                                 <td class="p-3 px-5">{{ $item->id }}</td>
@@ -49,8 +49,7 @@
                             </tr>
                         @endforeach
                     @else
-                        
-                    @endif
+                    @endif --}}
                 </table>
             </div>
         </div>
