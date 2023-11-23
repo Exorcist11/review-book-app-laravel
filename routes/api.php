@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthorController;
+use App\Http\Controllers\BookController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PublisherController;
 use Illuminate\Http\Request;
@@ -22,3 +24,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::resource('/v1/caegories', CategoryController::class);
 Route::resource('/v1/publisher', PublisherController::class);
+Route::resource('/v1/author', AuthorController::class);
+Route::resource('/v1/book', BookController::class);

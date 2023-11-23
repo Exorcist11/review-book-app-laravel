@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publisher as PublisherTable;
 use App\Http\Resources\Publisher as PublisherResource;
+use Illuminate\Support\Facades\Validator;
 
 class PublisherController extends Controller
 {
@@ -24,7 +25,7 @@ class PublisherController extends Controller
         } catch (\Exception $err) {
             $res = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($res, 500);
@@ -44,7 +45,43 @@ class PublisherController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(), [
+                'publisherName' => 'required',
+                'contact' => 'required',
+                
+            ]);
+
+            if ($validator->fails()) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Error from validator',
+                    'error' => $validator->errors(),
+                ];
+                return response()->json($res, 400);
+            }
+    
+            $publisher = PublisherTable::create([
+                'publisherName' => $request->input('publisherName'),
+                'contact' => $request->input('contact'),
+                
+            ]);
+
+            $res = [
+                'status' => true,
+                'message' => 'Create publisher successfully',
+                'data' => new PublisherResource($publisher),
+            ];
+
+            return response()->json($res, 200);
+        } catch (\Exception $err) {
+            $res = [
+                'success' => false,
+                'message' => 'Something went wrongr',
+                'err' => $err
+            ];
+            return response()->json($res, 500);
+        }
     }
 
     /**
@@ -52,7 +89,31 @@ class PublisherController extends Controller
      */
     public function show(string $id)
     {
-        //
+        try {
+            $publisher = PublisherTable::find($id);
+            if (is_null($publisher)) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Publisher not found',
+                    'data' => []
+                ];
+                return response()->json($res, 404);
+            }
+
+            $res = [
+                'status' => true,
+                'message' => 'Get publisher successfully',
+                'data' => new PublisherResource($publisher)
+            ];
+            return response()->json($res, 201);
+        } catch (\Exception $err) {
+            $res = [
+                'success' => false,
+                'message' => 'Something went wrongr',
+                'error' => $err
+            ];
+            return response()->json($res, 500);
+        }
     }
 
     /**
@@ -68,7 +129,44 @@ class PublisherController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $input = $request->all();
+            $validator = Validator::make($input, [
+                'publisherName' => 'required',
+                'contact' => 'required'
+            ]);
+            if ($validator->fails()) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Error from validate',
+                    'error' => $validator->errors()
+                ];
+                return response()->json($res, 400);
+            }
+            $publisher = PublisherTable::find($id);
+            if (is_null($publisher)) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Publisher not found',
+                    'data' => []
+                ];
+                return response()->json($res, 404);
+            }
+            $publisher->update($input);
+            $res = [
+                'status' => true,
+                'message' => 'Update publisher successfully',
+                'data' => new PublisherResource($publisher)
+            ];
+            return response()->json($res, 200);
+        } catch (\Exception $err) {
+            $res = [
+                'success' => false,
+                'message' => 'Something went wrongr',
+                'error' => $err
+            ];
+            return response()->json($res, 500);
+        }
     }
 
     /**
@@ -76,6 +174,30 @@ class PublisherController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $publisher = PublisherTable::find($id);
+            if (is_null($publisher)) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Publisher not found',
+                    'data' => []
+                ];
+                return response()->json($res, 404);
+            }
+
+            $publisher->delete();
+            $res = [
+                'status' => true,
+                'message' => 'Delete publisher successfully'
+            ];
+            return response()->json($res, 201);
+        } catch (\Exception $err) {
+            $res = [
+                'success' => false,
+                'message' => 'Something went wrongr',
+                'error' => $err
+            ];
+            return response()->json($res, 500);
+        }
     }
 }

@@ -9,8 +9,9 @@ class Author extends Model
 {
     use HasFactory;
 
-    public function images()
-    {
-        return $this->morphMany(Image::class, 'imageable');
-    }
+    protected $fillable = [
+        'name',
+        'introduction',
+        'image_path'
+    ];
 }

@@ -26,7 +26,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($arr, 500);
@@ -70,7 +70,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($arr, 500);
@@ -102,7 +102,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($arr, 500);
@@ -160,7 +160,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($arr, 500);
@@ -191,7 +191,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Error from server',
+                'message' => 'Something went wrongr',
                 'error' => $err
             ];
             return response()->json($arr, 500);
