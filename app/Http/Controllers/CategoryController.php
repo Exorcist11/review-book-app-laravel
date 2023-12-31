@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Category as CategoryTable;
 use App\Http\Resources\Category as CategoryResource;
+use App\Models\Book;
 use Illuminate\Http\Request;
 
 
@@ -127,7 +128,7 @@ class CategoryController extends Controller
             $input = $request->all();
             // validation data
             $validator = Validator::make($input, [
-                'categoryName' => 'required|unique:categories'
+                'categoryName' => 'required'
             ]);
             //check data
             if ($validator->fails()) {
@@ -182,6 +183,8 @@ class CategoryController extends Controller
                 ];
                 return response()->json($arr, 404);
             }
+            Book::where('category_id', $id)->delete();
+
             $category->delete();
             $arr = [
                 'status' => true,
@@ -191,7 +194,7 @@ class CategoryController extends Controller
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,
-                'message' => 'Something went wrongr',
+                'message' => 'Something went wrong',
                 'error' => $err
             ];
             return response()->json($arr, 500);

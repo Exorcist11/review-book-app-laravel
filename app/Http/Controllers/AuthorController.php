@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Author as AuthorTable;
-use App\Http\Resources\Author as AuthorResource;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\AuthorRequest;
+use App\Models\Author;
+use App\Models\Book;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 
 class AuthorController extends Controller
 {
@@ -15,11 +17,11 @@ class AuthorController extends Controller
     public function index()
     {
         try {
-            $data = AuthorTable::all();
+            $data = Author::all();
             $res = [
                 'status' => true,
                 'message' => 'List Author',
-                'data' => AuthorResource::collection($data)
+                'data' => $data
             ];
             return response()->json($res, 200);
         } catch (\Exception $err) {
@@ -43,47 +45,29 @@ class AuthorController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(AuthorRequest $request)
     {
         try {
-            $rules = [
-                'image_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-                'name' => 'required|string|max:255',
-            ];
-
-            $validator = Validator::make($request->all(), $rules);
-
-            if ($validator->fails()) {
-                $res = [
-                    'success' => false,
-                    'message' => 'Error from validate',
-                    'error' => $validator->errors()
-                ];
-                return response()->json($res, 400);
-            }
-
-            $image_path = $request->file('image_path');
-            $storedPath = $image_path->move('images', $image_path->getClientOriginalName());
-            $authorName = $request->input('name');
-            $introduction = $request->input('introduction');
-
-            $author = AuthorTable::create([
-                'image_path' => $image_path->getClientOriginalName(),
-                'name' => $authorName,
-                'introduction' => $introduction
+            $imageName = Str::random(32) . "." . $request->image_path->getClientOriginalExtension();
+            $author = Author::create([
+                'name' => $request->name,
+                'introduction' => $request->introduction,
+                'image_path' => $imageName
             ]);
+
+            Storage::disk('public')->put($imageName, file_get_contents($request->image_path));
 
             $res = [
                 'status' => true,
                 'message' => 'Create author successfully',
-                'data' => new AuthorResource($author)
+                'data' => $author
             ];
 
             return response()->json($res, 200);
         } catch (\Exception $err) {
             $res = [
                 'success' => false,
-                'message' => 'Something went wrongr',
+                'message' => 'Something went wrong',
                 'error' => $err
             ];
             return response()->json($res, 500);
@@ -96,7 +80,7 @@ class AuthorController extends Controller
     public function show(string $id)
     {
         try {
-            $author = AuthorTable::find($id);
+            $author = Author::find($id);
             if (is_null($author)) {
                 $res = [
                     'success' => false,
@@ -108,7 +92,7 @@ class AuthorController extends Controller
             $res = [
                 'status' => true,
                 'message' => 'get Author Success',
-                'data' => new AuthorResource($author)
+                'data' => $author
             ];
             return response($res, 200);
         } catch (\Exception $err) {
@@ -132,9 +116,48 @@ class AuthorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(AuthorRequest $request, string $id)
     {
-        //
+        try {
+            $author = Author::find($id);
+            if (!$author) {
+                $res = [
+                    'success' => false,
+                    'message' => 'Author not found!',
+                    'data' => []
+                ];
+                return response()->json($res, 404);
+            }
+
+            $author->name = $request->name;
+            $author->introduction = $request->introduction;
+
+            if ($request->image_path) {
+                $storage = Storage::disk('public');
+
+                if ($storage->exists($author->image_path))
+                    $storage->delete($author->image_path);
+                $image_name = Str::random(32) . "." . $request->image_path->getClientOriginalExtension();
+                $author->image_path = $image_name;
+
+                $storage->put($image_name, file_get_contents($request->image_path));
+            }
+
+            $author->save();
+            $res = [
+                'status' => true,
+                'message' => 'Author successfully updated!',
+                'data' => $author
+            ];
+            return response()->json($author, 200);
+        } catch (\Exception $err) {
+            $arr = [
+                'success' => false,
+                'message' => 'Something went wrong',
+                'error' => $err
+            ];
+            return response()->json($arr, 500);
+        }
     }
 
     /**
@@ -143,7 +166,7 @@ class AuthorController extends Controller
     public function destroy(string $id)
     {
         try {
-            $author = AuthorTable::find($id);
+            $author = Author::find($id);
             if (is_null($author)) {
                 $res = [
                     'success' => false,
@@ -152,7 +175,11 @@ class AuthorController extends Controller
                 ];
                 return response()->json($res, 404);
             }
-            AuthorTable::destroy($id);
+            Book::where('author_id', $id)->delete();
+            $storage = Storage::disk('public');
+            if ($storage->exists($author->image_path))
+                $storage->delete($author->image_path);
+            Author::destroy($id);
             $res = [
                 'status' => true,
                 'message' => 'Delete author successfully'

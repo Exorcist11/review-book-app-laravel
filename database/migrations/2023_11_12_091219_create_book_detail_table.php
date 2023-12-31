@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('book_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('bookID')->constrained('books');
+            $table->foreignId('bookID')->constrained('books')->onDelete('cascade');
             $table->integer('release');
             $table->integer('pageCount');
             $table->text('description');

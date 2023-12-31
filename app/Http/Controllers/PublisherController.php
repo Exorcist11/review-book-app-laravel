@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Publisher as PublisherTable;
 use App\Http\Resources\Publisher as PublisherResource;
+use App\Models\Book;
 use Illuminate\Support\Facades\Validator;
 
 class PublisherController extends Controller
@@ -49,7 +50,7 @@ class PublisherController extends Controller
             $validator = Validator::make($request->all(), [
                 'publisherName' => 'required',
                 'contact' => 'required',
-                
+
             ]);
 
             if ($validator->fails()) {
@@ -60,11 +61,11 @@ class PublisherController extends Controller
                 ];
                 return response()->json($res, 400);
             }
-    
+
             $publisher = PublisherTable::create([
                 'publisherName' => $request->input('publisherName'),
                 'contact' => $request->input('contact'),
-                
+
             ]);
 
             $res = [
@@ -184,7 +185,7 @@ class PublisherController extends Controller
                 ];
                 return response()->json($res, 404);
             }
-
+            Book::where('publisher_id', $id)->delete();
             $publisher->delete();
             $res = [
                 'status' => true,

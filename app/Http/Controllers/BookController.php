@@ -8,7 +8,9 @@ use App\Models\BookDetail;
 use App\Models\Category;
 use App\Models\Publisher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class BookController extends Controller
 {
@@ -18,8 +20,12 @@ class BookController extends Controller
     public function index()
     {
         try {
-            $book = Book::join('book_details', 'books.id', '=', 'book_details.bookID')->get();
-    
+            $book = Book::select('books.id', 'book_name', 'name', 'publisherName', 'categoryName')
+                ->join('authors', 'books.author_id', '=', 'authors.id')
+                ->join('publishers', 'books.publisher_id', '=', 'publishers.id')
+                ->join('categories', 'books.category_id', '=', 'categories.id')
+                ->get();
+
             $res = [
                 'status' => true,
                 'message' => 'List Book',
@@ -101,8 +107,8 @@ class BookController extends Controller
                 ];
                 return response()->json($res, 404);
             }
-            $image_path = $request->file('image_path');
-            $image_path->move('images', $image_path->getClientOriginalName());
+            $book_image = Str::random(32). "." . $request->image_path->getClientOriginalExtension();
+           Storage::disk('public')->put($book_image, file_get_contents($request->image_path));
 
             $book = Book::create([
                 'book_name' => $request->input('book_name'),
@@ -115,7 +121,7 @@ class BookController extends Controller
                 'release' => $request->input('release'),
                 'pageCount' => $request->input('pageCount'),
                 'description' => $request->input('description'),
-                'image_path' => $image_path->getClientOriginalName()
+                'image_path' => $book_image
             ]);
 
             $res = [
@@ -141,7 +147,9 @@ class BookController extends Controller
     public function show(string $id)
     {
         try {
-            $book = Book::join('book_details', 'books.id', '=', 'book_details.bookID')->where('books.id', '=', $id)->get();
+            $book = Book::leftJoin('book_details', 'books.id', '=', 'book_details.bookID')
+                ->where('books.id', '=', $id)
+                ->get();
             if ($book->count() <= 0) {
                 $res = [
                     'success' => false,
@@ -190,7 +198,9 @@ class BookController extends Controller
     public function destroy(string $id)
     {
         try {
-            $book = Book::join('book_details', 'books.id', '=', 'book_details.bookID')->where('books.id', '=', $id)->get();
+            $book = Book::leftJoin('book_details', 'books.id', '=', 'book_details.bookID')
+                ->where('books.id', '=', $id)
+                ->get();
             if ($book->count() <= 0) {
                 $res = [
                     'success' => false,
