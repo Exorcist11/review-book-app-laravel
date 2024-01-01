@@ -107,8 +107,8 @@ class BookController extends Controller
                 ];
                 return response()->json($res, 404);
             }
-            $book_image = Str::random(32). "." . $request->image_path->getClientOriginalExtension();
-           Storage::disk('public')->put($book_image, file_get_contents($request->image_path));
+            $book_image = Str::random(32) . "." . $request->image_path->getClientOriginalExtension();
+            Storage::disk('public')->put($book_image, file_get_contents($request->image_path));
 
             $book = Book::create([
                 'book_name' => $request->input('book_name'),
@@ -201,6 +201,7 @@ class BookController extends Controller
             $book = Book::leftJoin('book_details', 'books.id', '=', 'book_details.bookID')
                 ->where('books.id', '=', $id)
                 ->get();
+            $bookIMG = BookDetail::select('image_path')->where('bookID', $id)->get();
             if ($book->count() <= 0) {
                 $res = [
                     'success' => false,
@@ -209,7 +210,9 @@ class BookController extends Controller
                 ];
                 return response()->json($res, 404);
             }
-
+            $storage = Storage::disk('public');
+            if ($storage->exists($bookIMG))
+                $storage->delete($bookIMG);
             $deletedBD = BookDetail::where('bookID', '=', $id)->delete();
             $delete = Book::where('id', '=', $id)->delete();
             $res = [
@@ -222,7 +225,8 @@ class BookController extends Controller
             $res = [
                 'success' => false,
                 'message' => 'Something went wrong',
-                'error' => $err->getMessage()
+                'error' => $err->getMessage(),
+                'book' => $bookIMG
             ];
             return response()->json($res, 500);
         }

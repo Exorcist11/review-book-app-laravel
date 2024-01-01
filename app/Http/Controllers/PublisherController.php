@@ -132,18 +132,7 @@ class PublisherController extends Controller
     {
         try {
             $input = $request->all();
-            $validator = Validator::make($input, [
-                'publisherName' => 'required',
-                'contact' => 'required'
-            ]);
-            if ($validator->fails()) {
-                $res = [
-                    'success' => false,
-                    'message' => 'Error from validate',
-                    'error' => $validator->errors()
-                ];
-                return response()->json($res, 400);
-            }
+           
             $publisher = PublisherTable::find($id);
             if (is_null($publisher)) {
                 $res = [

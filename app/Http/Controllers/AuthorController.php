@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthorRequest;
 use App\Models\Author;
 use App\Models\Book;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -116,9 +117,11 @@ class AuthorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(AuthorRequest $request, string $id)
+    public function update(Request $request, string $id)
     {
         try {
+
+            $imageName = Str::random(32) . "." . $request->image_path->getClientOriginalExtension();
             $author = Author::find($id);
             if (!$author) {
                 $res = [
@@ -128,28 +131,24 @@ class AuthorController extends Controller
                 ];
                 return response()->json($res, 404);
             }
+            Storage::disk('public')->put($imageName, file_get_contents($request->image_path));
+            $storage = Storage::disk('public');
+            if ($storage->exists($author->image_path))
+                $storage->delete($author->image_path);
 
-            $author->name = $request->name;
-            $author->introduction = $request->introduction;
+            $author->update([
+                'name' => $request->input('name'),
+                'introduction' => $request->input('introduction'),
+                'image_path' => $imageName
+            ]);
 
-            if ($request->image_path) {
-                $storage = Storage::disk('public');
 
-                if ($storage->exists($author->image_path))
-                    $storage->delete($author->image_path);
-                $image_name = Str::random(32) . "." . $request->image_path->getClientOriginalExtension();
-                $author->image_path = $image_name;
-
-                $storage->put($image_name, file_get_contents($request->image_path));
-            }
-
-            $author->save();
             $res = [
                 'status' => true,
                 'message' => 'Author successfully updated!',
                 'data' => $author
             ];
-            return response()->json($author, 200);
+            return response()->json($res, 200);
         } catch (\Exception $err) {
             $arr = [
                 'success' => false,

@@ -59,4 +59,5 @@ Route::controller(BookController::class)->group(function () {
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/v1/register', 'register');
+    Route::post('/v1/sign-in', 'login');
 });
